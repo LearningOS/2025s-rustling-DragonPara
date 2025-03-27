@@ -50,6 +50,47 @@ where
 
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
+        if self.root.is_none(){
+            self.root = Some(Box::new(TreeNode::new(value)))
+        }
+        else{
+            let mut left = self.root.unwrap().left;
+            let mut right = self.root.unwrap().right;
+            let mut last = self.root.unwrap();
+            while true{
+                match left{
+                    Some(l)=>{
+                        if l<=value{
+                            if l.left.is_none(){
+                                l.left = Some(Box::new(TreeNode::new(value)));
+                                break;
+                            }
+                            else{
+                                left = l.left;
+                                right = l.right;
+                                last = l;
+                            }
+                        }
+                        else{
+                            if right.is_none(){
+                                last.right = Some(Box::new(TreeNode::new(value)));
+                                break;
+                            }
+                            else{
+                                let 
+                                left = r.left;
+                                right = r.right;
+                                last = r;
+                            }
+                        }
+                    }
+                    None=>{
+                        last.left = Some(Box::new(TreeNode::new(value)));
+                    }
+                }
+
+            }
+        }
         //TODO
     }
 

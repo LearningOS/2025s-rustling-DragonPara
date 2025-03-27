@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -47,11 +46,16 @@ impl<T> LinkedList<T> {
     pub fn add(&mut self, obj: T) {
         let mut node = Box::new(Node::new(obj));
         node.next = None;
+        // NonNull::new_unchecked不检查指针是否有效，创建一个NonNull指针
+        // Box::into_raw返回*mut T，new_unchecked返回NonNull<T>
         let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
         match self.end {
             None => self.start = node_ptr,
+            // *end_ptr.as_ptr()相当于*(end_ptr.as_ptr()),因为.优先级高于*
             Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
         }
+        // Option<T>实现了Copy trait，self.end = node_ptr进行了复制而不是move,
+        // 所以node_ptr可以赋值给其他变量两次
         self.end = node_ptr;
         self.length += 1;
     }
@@ -70,13 +74,58 @@ impl<T> LinkedList<T> {
         }
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
+	where
+    T: PartialOrd+Clone+std::fmt::Display
+    {
+		let mut list_c = Self {
             length: 0,
             start: None,
             end: None,
+        };
+        let mut ptr_a = list_a.start;
+        let mut ptr_b = list_b.start;
+        let mut ptr_c = list_c.start;
+        unsafe{
+            while ptr_a!=None && ptr_b!=None{
+                let nonnull_a = ptr_a.unwrap();
+                let nonnull_b = ptr_b.unwrap();
+                let val_a = (*nonnull_a.as_ptr()).val.clone();
+                let val_b = (*nonnull_b.as_ptr()).val.clone();
+                
+                if (val_a ) <(val_b ){
+                    if list_c.length==0{
+                        list_c.start = ptr_a;
+                    }
+                    else{
+                        (*(ptr_c.unwrap().as_ptr())).next = ptr_a;
+                    }
+                    list_c.length +=1;
+                    ptr_c = ptr_a;
+                    ptr_a = (*nonnull_a.as_ptr()).next;
+                }
+                else{
+                    if list_c.length==0{
+                        list_c.start = ptr_b;
+                    }
+                    else{
+                        (*(ptr_c.unwrap().as_ptr())).next = ptr_b;
+                    }
+                    list_c.length +=1;
+                    ptr_c = ptr_b;
+                    ptr_b = (*nonnull_b.as_ptr()).next;
+                }
+            }
+            if ptr_a!=None{
+                (*(ptr_c.unwrap().as_ptr())).next = ptr_a;
+                list_c.end = list_a.end;
+            }
+            if ptr_b!=None{
+                (*(ptr_c.unwrap().as_ptr())).next = ptr_b;
+                list_c.end = list_b.end;
+            }
+
         }
+        list_c
 	}
 }
 
